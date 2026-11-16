@@ -1,0 +1,13 @@
+{
+  "applinks": {
+    "details": [
+      {
+        "appIDs": ["8CGRHY7T58.com.hoodchang.MacReach"],
+        "components": [
+          { "/": "/macpoke/open", "comment": "MacPoke notification links (#140)" },
+          { "/": "/macpoke/open/", "comment": "Same, with a trailing slash" }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,91 @@
+<!doctype html>
+<!--
+  MacPoke 通知連結的落地頁（#140）：https://apps.hoodchang.com/macpoke/open#id=…&zoom=center
+  有裝 MacPoke 時 iOS 直接打開 App（apple-app-site-association），不會看到這頁；
+  沒裝、或在 Safari 裡打開時才看到。Mac 的 id 在 # 後面：瀏覽器不會把 # 後面送給網站，
+  這頁也只在瀏覽器裡讀，不顯示、不送出，只把同樣的參數交給 macpoke:// 讓 App 打開。
+  三種語言照瀏覽器的語言；App Store 連結等上架後填（APP_STORE_URL）。
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>MacPoke</title>
+<style>
+  :root { --bg: #f5f5f7; --card: #fff; --text: #1d1d1f; --secondary: #6e6e73; --accent: #0a66d8; --gold: #fcca58; }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #000; --card: #1c1c1e; --text: #f5f5f7; --secondary: #a1a1a6; --accent: #4da3ff; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text);
+         font: 17px/1.5 -apple-system, BlinkMacSystemFont, "PingFang TC", "Hiragino Sans", sans-serif; }
+  main { max-width: 480px; margin: 0 auto; padding: 48px 16px; }
+  .card { background: var(--card); border-radius: 20px; padding: 28px 24px; }
+  h1 { font-size: 24px; margin: 0 0 8px; }
+  p { margin: 0 0 16px; color: var(--secondary); }
+  .button { display: block; text-align: center; padding: 14px; border-radius: 14px; text-decoration: none;
+            font-weight: 600; margin-top: 12px; }
+  .primary { background: var(--accent); color: #fff; }
+  .secondary { color: var(--accent); }
+  .mark { width: 12px; height: 12px; border-radius: 50%; background: var(--gold); display: inline-block; margin-right: 8px; }
+  footer { margin-top: 24px; font-size: 13px; color: var(--secondary); text-align: center; }
+</style>
+</head>
+<body>
+<main>
+  <div class="card">
+    <h1><span class="mark"></span><span data-t="title">Open in MacPoke</span></h1>
+    <p data-t="body">This link connects to one of your Macs in MacPoke. It only opens a Mac that's already in your MacPoke list, and you'll still verify it's you before connecting.</p>
+    <a class="button primary" id="open" href="macpoke://connect" data-t="open">Open MacPoke</a>
+    <a class="button secondary" id="store" href="APP_STORE_URL" data-t="store">Get MacPoke on the App Store</a>
+  </div>
+  <footer data-t="footer">MacPoke · remote control for your Mac from iPhone and iPad</footer>
+</main>
+<script>
+  // 同樣的參數交給 App（id、mac、zoom 以外的不帶）；網址裡的內容不顯示在頁面上、不送出。
+  // 參數在 # 後面（舊的連結在 ? 後面，也接受）
+  (function () {
+    var params = new URLSearchParams(location.hash.replace(/^#/, "") || location.search);
+    var out = new URLSearchParams();
+    ["id", "mac", "zoom"].forEach(function (key) {
+      var value = params.get(key);
+      if (value) out.set(key, value);
+    });
+    // URLSearchParams 把空白寫成 +，App 那邊會當成真的 +，所以換成 %20
+    var query = out.toString().replace(/\+/g, "%20");
+    document.getElementById("open").href = "macpoke://connect" + (query ? "?" + query : "");
+    // 還沒上架（App Store 連結還沒填）就不顯示那個按鈕
+    var store = document.getElementById("store");
+    if (store.getAttribute("href") === "APP_STORE_URL") store.style.display = "none";
+  })();
+
+  var strings = {
+    "zh": {
+      title: "用 MacPoke 打開",
+      body: "這個連結會在 MacPoke 裡連到你的一台 Mac。它只能打開已經在 MacPoke 清單裡的 Mac，連線前一樣要驗證身分。",
+      open: "打開 MacPoke",
+      store: "在 App Store 下載 MacPoke",
+      footer: "MacPoke · 用 iPhone 和 iPad 遠端操作你的 Mac"
+    },
+    "ja": {
+      title: "MacPoke で開く",
+      body: "このリンクは MacPoke であなたの Mac に接続します。開けるのは MacPoke の一覧にすでにある Mac だけで、接続の前には通常どおり本人確認が必要です。",
+      open: "MacPoke を開く",
+      store: "App Store で MacPoke を入手",
+      footer: "MacPoke · iPhone と iPad から Mac をリモート操作"
+    }
+  };
+  var lang = (navigator.language || "en").toLowerCase();
+  var table = lang.indexOf("zh") === 0 ? strings.zh : lang.indexOf("ja") === 0 ? strings.ja : null;
+  if (table) {
+    document.documentElement.lang = lang.indexOf("zh") === 0 ? "zh-Hant" : "ja";
+    document.querySelectorAll("[data-t]").forEach(function (el) {
+      var text = table[el.getAttribute("data-t")];
+      if (text) el.textContent = text;
+    });
+    document.title = table.title;
+  }
+</script>
+</body>
+</html>
